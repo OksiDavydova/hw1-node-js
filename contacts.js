@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const { argv } = require("./line-command");
 const { errorMessage, successMessage } = require("./message");
 
+const contactPath = path.join(__dirname, "db", "contacts.json");
 class Contacts {
   constructor(action, id, name, email, phone) {
     this.action = action;
@@ -16,10 +17,7 @@ class Contacts {
 
   readContent = async () => {
     try {
-      const content = await fs.readFile(
-        path.join(__dirname, "db", "contacts.json"),
-        "utf8"
-      );
+      const content = await fs.readFile(contactPath, "utf8");
       const result = JSON.parse(content);
       return result;
     } catch (err) {
@@ -65,10 +63,7 @@ class Contacts {
       }
 
       const filterContacts = contacts.filter(({ id }) => id !== contactId);
-      await fs.writeFile(
-        path.join(__dirname, "db", "contacts.json"),
-        JSON.stringify(filterContacts, null, 2)
-      );
+      await fs.writeFile(contactPath, JSON.stringify(filterContacts, null, 2));
       console.log(
         successMessage(
           `Contact with id: ${contactId} was successfully deleted !`
@@ -101,10 +96,7 @@ class Contacts {
         const newContact = { name, email, phone, id: crypto.randomUUID() };
         contacts.push(newContact);
 
-        await fs.writeFile(
-          path.join(__dirname, "db", "contacts.json"),
-          JSON.stringify(contacts, null, 2)
-        );
+        await fs.writeFile(contactPath, JSON.stringify(contacts, null, 2));
         console.log(successMessage("New contact was successfully added!"));
         console.table(newContact);
       }
@@ -113,22 +105,22 @@ class Contacts {
     }
   };
 
-  invokeAction = async ({ action, id, name, email, phone }) => {
+  invokeAction = ({ action, id, name, email, phone }) => {
     switch (action) {
       case "list":
-        await this.listContacts();
+        this.listContacts();
         break;
 
       case "get":
-        await this.getContactById(id);
+        this.getContactById(id);
         break;
 
       case "add":
-        await this.addContact(name, email, phone);
+        this.addContact(name, email, phone);
         break;
 
       case "remove":
-        await this.removeContact(id);
+        this.removeContact(id);
         break;
 
       default:
